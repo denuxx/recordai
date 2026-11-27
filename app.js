@@ -294,7 +294,7 @@
   }
 
   function insertIntoNote(text) {
-    if (noteText.textContent.length > 150) noteText.innerHTML = "";
+    if (noteText.textContent.length > (innerWidth < 720 ? 60 : 150)) noteText.innerHTML = "";
     const prefix = noteText.textContent ? " " : "";
     const span = document.createElement("span");
     span.className = "fresh";
