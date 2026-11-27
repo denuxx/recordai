@@ -4,54 +4,14 @@
 
   // Where the "Download" buttons point. One place to change it.
   const DOWNLOAD_URL = "https://github.com/denuxx/recordai/releases/latest/download/Record-AI.dmg";
-  const VERSION = "1.0.1";
+  const VERSION = "1.1.0";
 
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const sleepRaw = (ms) => new Promise((r) => setTimeout(r, ms));
+  const motion = matchMedia("(prefers-reduced-motion: reduce)");
 
   $$(".js-download").forEach((a) => { a.href = DOWNLOAD_URL; a.setAttribute("download", ""); });
   $("#version").textContent = "Версия " + VERSION;
-
-  /* ---------------- Nav, reveal, glow ---------------- */
-  const nav = $("#nav");
-  const onScroll = () => nav.classList.toggle("scrolled", scrollY > 10);
-  addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
-  $$(".reveal").forEach((el, i) => {
-    el.style.transitionDelay = (el.closest(".hero") ? i * 70 : 0) + "ms";
-    io.observe(el);
-  });
-
-  $$(".tile").forEach((tile) => {
-    tile.addEventListener("pointermove", (e) => {
-      const r = tile.getBoundingClientRect();
-      tile.style.setProperty("--mx", e.clientX - r.left + "px");
-      tile.style.setProperty("--my", e.clientY - r.top + "px");
-    });
-  });
-
-  // The demo window tilts gently toward the pointer.
-  const win = $("#window");
-  const hero = $(".hero");
-  if (!reduceMotion && matchMedia("(pointer: fine)").matches) {
-    hero.addEventListener("pointermove", (e) => {
-      const r = win.getBoundingClientRect();
-      const x = (e.clientX - (r.left + r.width / 2)) / innerWidth;
-      const y = (e.clientY - (r.top + r.height / 2)) / innerHeight;
-      win.style.setProperty("--ry", (x * 8).toFixed(2) + "deg");
-      win.style.setProperty("--rx", (3 - y * 6).toFixed(2) + "deg");
-    });
-    hero.addEventListener("pointerleave", () => {
-      win.style.setProperty("--ry", "0deg");
-      win.style.setProperty("--rx", "6deg");
-    });
-  }
 
   /* ---------------- Filler cleanup (same rules as the app's Fillers.swift) ---------------- */
   const Fillers = (() => {
@@ -123,8 +83,8 @@
     for (let i = 0; i < n; i++) out[i] = out[i] / peak * 0.85;
     return buf;
   }
-  function chime(kind, force = false) {
-    if (!soundOn && !force) return;
+  function chime(kind) {
+    if (!soundOn) return;
     const c = audio();
     const src = c.createBufferSource(), gain = c.createGain();
     src.buffer = buffers[kind]; gain.gain.value = 0.35;
@@ -136,377 +96,293 @@
     soundBtn.setAttribute("aria-pressed", soundOn);
     if (soundOn) chime("start");
   });
-  const drop = $("#dropBtn");
-  drop.addEventListener("click", () => {
-    chime("start", true);
-    drop.classList.remove("play"); void drop.offsetWidth; drop.classList.add("play");
-  });
 
-  /* ---------------- Waveform bars (shared by the hero pill and the mini pill) ---------------- */
-  function makeBars(el, count) {
-    el.innerHTML = "";
-    const bars = Array.from({ length: count }, () => el.appendChild(document.createElement("i")));
-    const shape = bars.map((_, i) => 0.35 + 0.65 * Math.sin(Math.PI * (i + 0.5) / count));
-    return { bars, shape, level: 0, target: 0 };
-  }
-  function drawBars(w, maxH, t) {
-    // Fast attack, slow release, exactly like the app. At zero level every bar is flat.
-    w.level += (w.target - w.level) * (w.target > w.level ? 0.6 : 0.15);
-    w.bars.forEach((b, i) => {
-      const wobble = 0.6 + 0.4 * Math.sin(t / 90 + i * 1.7) * Math.sin(t / 130 + i * 0.9);
-      b.style.height = Math.max(2, w.level * w.shape[i] * maxH * wobble) + "px";
-    });
-  }
-
+  /* The graphic and the scripted transcription both work without microphone access. */
+  const instrument = $("#demo");
   const pill = $("#pill");
-  const heroBars = makeBars($("#bars"), 13);
-  const miniBars = makeBars($("#miniBars"), 11);
-  const pillScale = () => parseFloat(getComputedStyle(pill).getPropertyValue("--s")) || 1.6;
-
-  /* ---------------- Microphone visualizer (local only, nothing is recorded) ---------------- */
-  let mic = null; // { analyser, data, stream }
-  const micBtn = $("#micBtn");
-  function micLevel() {
-    if (!mic) return 0;
-    mic.analyser.getFloatTimeDomainData(mic.data);
-    let sum = 0; for (const v of mic.data) sum += v * v;
-    const db = 20 * Math.log10(Math.sqrt(sum / mic.data.length) + 1e-9);
-    const gate = -50;
-    return Math.max(0, Math.min(1, (db - gate) / (-12 - gate)));
-  }
-  micBtn.addEventListener("click", async () => {
-    if (mic) { stopMic(); return; }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-      const c = audio();
-      const analyser = c.createAnalyser(); analyser.fftSize = 1024;
-      c.createMediaStreamSource(stream).connect(analyser);
-      mic = { analyser, data: new Float32Array(analyser.fftSize), stream };
-      micBtn.setAttribute("aria-pressed", "true");
-      demo.interrupt("mic");
-    } catch {
-      $("#demoText").textContent = "Нет доступа к микрофону — ничего страшного, демо работает и так.";
-    }
-  });
-  function stopMic() {
-    mic?.stream.getTracks().forEach((t) => t.stop());
-    mic = null;
-    micBtn.setAttribute("aria-pressed", "false");
-    demo.interrupt("auto");
-  }
-
-  /* ---------------- Hero demo ---------------- */
+  const bars = Array.from({ length: 13 }, () => $("#bars").appendChild(document.createElement("i")));
+  const idleHeights = [3, 5, 8, 13, 9, 18, 14, 10, 16, 11, 7, 5, 3];
   const caption = $("#caption");
   const noteText = $("#noteText");
-  const keyHint = $("#keyHint");
-  const demoText = $("#demoText");
-
+  const status = $("#demoText");
+  const micBtn = $("#micBtn");
   const examples = [
-    "[Ну,] [короче,] завтра созвон в десять. [Эээ,] надо обсудить релиз и деплой.",
-    "Слушай, вылезла ошибка: Cannot find type User in scope. Посмотришь, когда будет минутка?",
-    "Это, [типа,] работает, но, [как бы,] не всегда. Push в main уже сделал.",
+    "[Ну,] [короче,] покажу прототип завтра на встрече.",
+    "После code review отправлю правки.",
+    "[Эээ,] сделай текст короче, пожалуйста.",
   ];
-
-  const demo = {
-    mode: "auto",     // "auto" | "mic"
-    phase: "idle",    // "idle" | "recording" | "processing"
-    skip: false,      // ends the current skippable wait early
-    wake: null,
-    run: 0,
-    interrupt(mode) {
-      if (mode) this.mode = mode;
-      this.run++;
-      this.skip = true;
-      this.wake?.();
-    },
-  };
-
-  // A wait that a key press can cut short.
-  function wait(ms, skippable = true) {
-    if (reduceMotion) ms = Math.min(ms, 300);
-    return new Promise((resolve) => {
-      if (skippable && demo.skip) { demo.skip = false; return resolve(); }
-      const t = setTimeout(done, ms);
-      function done() { clearTimeout(t); if (demo.wake === done) demo.wake = null; resolve(); }
-      if (skippable) demo.wake = done;
-    });
-  }
-
-  function pressKey() {
-    keyHint.classList.add("pressed");
-    setTimeout(() => keyHint.classList.remove("pressed"), 180);
-  }
-
-  function setPill(state) { pill.dataset.state = state; demo.phase = state === "hidden" ? "idle" : state; }
-
-  function parse(example) {
-    return example.split(" ").map((tok) => {
-      const filler = tok.startsWith("[") && tok.endsWith("]");
-      return { text: filler ? tok.slice(1, -1) : tok, filler };
-    });
-  }
-
   let exampleIndex = 0;
-  async function autoCycle(run) {
-    const tokens = parse(examples[exampleIndex % examples.length]);
-    exampleIndex++;
-    const spoken = tokens.map((t) => t.text).join(" ");
+  let phase = "ready";
+  let tokens = [];
+  let spoken = "";
+  let previousNote = noteText.textContent;
+  let timer = 0;
+  let frameId = 0;
+  let autoTimer = 0;
+  let mic = null;
+  let micRequest = 0;
+
+  function announce(text, visible = false) {
+    status.classList.toggle("sr-only", !visible);
+    status.textContent = text;
+  }
+  function preventAutoplay() {
+    clearTimeout(autoTimer);
+    autoObserver.disconnect();
+  }
+  function setPhase(next) {
+    clearTimeout(timer);
+    cancelAnimationFrame(frameId);
+    phase = next;
+    instrument.dataset.phase = next;
+    pill.dataset.state = next;
+    const active = next === "recording" || next === "mic";
+    $("#cancelDemo").disabled = !active;
+    $("#confirmDemo").disabled = !active;
+    $("#playIcon").setAttribute("href", active ? "#i-stop" : "#i-play");
+    const labels = {ready: "Запустить демо", recording: "Вставить текст", processing: "Распознавание…", done: "Повторить демо", mic: "Выключить микрофон"};
+    $("#playLabel").textContent = labels[next];
+    $("#keyHint").disabled = next === "processing";
+    bars.forEach((bar, i) => { bar.style.height = idleHeights[i] + "px"; });
+    if (active && (!motion.matches || mic)) frameId = requestAnimationFrame(draw);
+  }
+  function draw(now) {
+    let level = .55 + .35 * Math.sin(now / 170);
+    if (mic) {
+      mic.analyser.getFloatTimeDomainData(mic.samples);
+      let sum = 0;
+      for (const sample of mic.samples) sum += sample * sample;
+      const db = 20 * Math.log10(Math.sqrt(sum / mic.samples.length) + 1e-9);
+      level = Math.min(1, Math.max(0, (db + 50) / 38));
+      if (now - mic.lastDraw >= (motion.matches ? 200 : 45)) {
+        mic.envelope.shift();
+        mic.envelope.push(Math.round(1 + level * 43));
+        mic.trace.setAttribute("d", mic.envelope.map((height, i) => "M" + (i * 2 + 1) + " " + (50 - height) + "v" + height * 2).join(" "));
+        mic.lastDraw = now;
+      }
+    }
+    if (!motion.matches) {
+      bars.forEach((bar, i) => {
+        const wobble = .65 + .35 * Math.sin(now / 100 + i * 1.3);
+        bar.style.height = (2 + level * (23 - Math.abs(i - 6) * 2) * wobble) + "px";
+      });
+    }
+    frameId = requestAnimationFrame(draw);
+  }
+
+  function prepareExample() {
+    const example = examples[exampleIndex++ % examples.length];
+    caption.replaceChildren(document.createTextNode("«"));
+    tokens = example.split(" ").map((token, i) => {
+      const word = document.createElement("span");
+      word.className = token.startsWith("[") ? "word filler" : "word";
+      word.textContent = token.replace(/^\[|\]$/g, "");
+      if (i) caption.append(" ");
+      caption.append(word);
+      return word;
+    });
+    caption.append("»");
+    spoken = tokens.map(word => word.textContent).join(" ");
+  }
+  function paste() {
     const result = Fillers(spoken);
-
-    // Start
-    demo.skip = false;
-    pressKey(); chime("start");
-    setPill("recording");
-    caption.className = "caption";
-    caption.innerHTML = '<span class="caption-label">Вы говорите</span>' +
-      tokens.map((t) => `<span class="cw${t.filler ? " filler" : ""}">${t.text} </span>`).join("");
-    const words = $$(".cw", caption);
-    await wait(450, false);
-    if (run !== demo.run) return;
-
-    // Speak word by word
-    for (let i = 0; i < words.length; i++) {
-      if (demo.skip) { words.slice(i).forEach((w) => w.classList.add("on")); break; }
-      words[i].classList.add("on");
-      heroBars.target = 0.55 + Math.random() * 0.45;
-      const pause = /[.?!:]$/.test(tokens[i].text) ? 520 : 0;
-      await wait(210 + tokens[i].text.length * 22 + pause);
-      heroBars.target = pause ? 0 : heroBars.target * 0.4;
-      if (run !== demo.run) return;
-    }
-    demo.skip = false;
-    heroBars.target = 0;
-    await wait(500);
-    if (run !== demo.run) return;
-
-    // Stop → processing
-    pressKey(); chime("stop");
-    setPill("processing");
-    $$(".cw.filler", caption).forEach((w) => w.classList.add("cut"));
-    await wait(750, false);
-    if (run !== demo.run) return;
-
-    // Paste
-    caption.classList.add("fade");
-    setPill("hidden");
-    insertIntoNote(result);
-    await wait(2600);
-  }
-
-  function insertIntoNote(text) {
-    if (noteText.textContent.length > (innerWidth < 720 ? 60 : 150)) noteText.innerHTML = "";
-    const prefix = noteText.textContent ? " " : "";
-    const span = document.createElement("span");
-    span.className = "fresh";
-    (prefix + text).split(/(\s+)/).forEach((part, i) => {
-      if (!part) return;
-      const w = document.createElement("span");
-      w.className = "w";
-      w.textContent = part;
-      w.style.animationDelay = i * 18 + "ms";
-      span.appendChild(w);
+    noteText.replaceChildren();
+    result.split(" ").forEach((part, i) => {
+      const word = document.createElement("span");
+      word.className = "fresh";
+      word.textContent = (i ? " " : "") + part;
+      word.style.animationDelay = (i * 30) + "ms";
+      noteText.append(word);
     });
-    noteText.appendChild(span);
-    setTimeout(() => span.classList.add("settled"), 1400);
+    setPhase("done");
+    announce("В заметку вставлен текст: " + result);
   }
-
-  async function micCycle(run) {
-    setPill("recording");
-    caption.className = "caption";
-    caption.innerHTML = '<span class="caption-label">Микрофон включён</span>Скажите что-нибудь — волна слушает вас. Сам текст распознаётся уже в приложении, на вашем Mac.';
-    $$(".cw", caption).forEach((w) => w.classList.add("on"));
-    demoText.innerHTML = "Звук не записывается и никуда не отправляется";
-    while (run === demo.run && demo.mode === "mic") await wait(250);
-    caption.className = "caption fade";
-    setPill("hidden");
-    demoText.innerHTML = "Нажмите <b>⌥ Space</b> прямо сейчас — или просто смотрите";
+  function finish() {
+    if (phase === "mic") { stopMic(); return; }
+    if (phase !== "recording") return;
+    tokens.forEach(word => {
+      word.classList.add("spoken");
+      if (word.classList.contains("filler")) word.classList.add("cut");
+    });
+    chime("stop");
+    setPhase("processing");
+    timer = setTimeout(paste, motion.matches ? 0 : 650);
   }
-
-  async function loop() {
-    for (;;) {
-      const run = demo.run;
-      try {
-        if (demo.mode === "mic") await micCycle(run);
-        else await autoCycle(run);
-      } catch (e) { console.error(e); await sleepRaw(1000); }
-      if (run !== demo.run) { setPill("hidden"); heroBars.target = 0; caption.className = "caption fade"; await sleepRaw(250); }
+  function revealWord(index) {
+    if (index === tokens.length) { timer = setTimeout(finish, 560); return; }
+    tokens[index].classList.add("spoken");
+    timer = setTimeout(() => revealWord(index + 1), 220 + tokens[index].textContent.length * 19);
+  }
+  function startDemo() {
+    preventAutoplay();
+    previousNote = noteText.textContent;
+    noteText.textContent = "";
+    prepareExample();
+    announce("Демонстрация диктовки.");
+    setPhase("recording");
+    chime("start");
+    if (motion.matches) {
+      tokens.forEach(word => word.classList.add("spoken"));
+      timer = setTimeout(finish, 1200);
+    } else {
+      revealWord(0);
     }
   }
-
-  // Frame loop for both waveforms.
-  function frame(t) {
-    if (demo.mode === "mic" && mic) heroBars.target = micLevel();
-    drawBars(heroBars, 18 * pillScale(), t);
-    drawBars(miniBars, 20, t);
-    requestAnimationFrame(frame);
+  function cancel() {
+    if (phase === "mic") { stopMic(); return; }
+    if (phase !== "recording" && phase !== "processing") return;
+    noteText.textContent = previousNote;
+    caption.textContent = "Диктовка отменена";
+    setPhase("ready");
+    announce("Диктовка отменена.");
   }
-  requestAnimationFrame(frame);
-
-  // ⌥ Space on the page drives the demo, like in the app: start, or finish early.
   function trigger() {
-    if (demo.mode === "mic") { stopMic(); return; }
-    demo.skip = true;
-    demo.wake?.();
+    if (phase === "recording" || phase === "mic") finish();
+    else if (phase !== "processing") startDemo();
   }
-  addEventListener("keydown", (e) => {
-    if (e.altKey && e.code === "Space") { e.preventDefault(); if (!e.repeat) trigger(); }
+  $("#keyHint").addEventListener("click", trigger);
+  $("#cancelDemo").addEventListener("click", cancel);
+  $("#confirmDemo").addEventListener("click", finish);
+  addEventListener("keydown", event => {
+    if (event.defaultPrevented || event.isComposing || event.target.closest?.("input,textarea,[contenteditable=true]")) return;
+    if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.code === "Space") {
+      event.preventDefault();
+      if (!event.repeat) trigger();
+    } else if (event.key === "Escape" && ["recording", "processing", "mic"].includes(phase)) {
+      cancel();
+    } else if (event.key === "Enter" && phase === "recording" && !event.target.closest?.("button,a,summary")) {
+      finish();
+    }
   });
-  keyHint.addEventListener("click", () => { audio(); trigger(); });
 
-  // Start the demo when it scrolls into view.
-  const demoIO = new IntersectionObserver((entries) => {
-    if (entries.some((e) => e.isIntersecting)) { demoIO.disconnect(); setTimeout(loop, 900); }
+  /* Audio samples go only to a local analyser. Disconnect its graph and tracks on exit. */
+  function stopMic() {
+    micRequest++;
+    micBtn.disabled = false;
+    if (!mic) return;
+    mic.source.disconnect();
+    mic.analyser.disconnect();
+    mic.stream.getTracks().forEach(track => track.stop());
+    mic.graph.remove();
+    mic = null;
+    micBtn.setAttribute("aria-pressed", "false");
+    caption.textContent = "Микрофон выключен";
+    setPhase("ready");
+    announce("Микрофон выключен.");
+  }
+  micBtn.addEventListener("click", async () => {
+    preventAutoplay();
+    if (mic) { stopMic(); return; }
+    const request = ++micRequest;
+    micBtn.disabled = true;
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}});
+      if (request !== micRequest || document.hidden) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      const context = audio();
+      const analyser = context.createAnalyser();
+      analyser.fftSize = 1024;
+      const source = context.createMediaStreamSource(stream);
+      source.connect(analyser);
+      const ns = "http://www.w3.org/2000/svg";
+      const graph = document.createElementNS(ns, "svg");
+      graph.setAttribute("viewBox", "0 0 128 100");
+      graph.setAttribute("preserveAspectRatio", "none");
+      const trace = document.createElementNS(ns, "path");
+      graph.append(trace);
+      $(".plot").append(graph);
+      cancel();
+      mic = {stream, source, analyser, graph, trace, samples: new Float32Array(analyser.fftSize), envelope: Array(64).fill(1), lastDraw: 0};
+      stream.getAudioTracks()[0].addEventListener("ended", stopMic, {once: true});
+      micBtn.setAttribute("aria-pressed", "true");
+      caption.textContent = "Волна вашего голоса в реальном времени";
+      setPhase("mic");
+      announce("Микрофон управляет волной. Аудио не записывается. Распознавание доступно в приложении.", true);
+    } catch {
+      stream?.getTracks().forEach(track => track.stop());
+      if (request === micRequest) {
+        cancel();
+        announce("Микрофон недоступен. Демонстрацию можно запустить без него.", true);
+      }
+    } finally {
+      if (request === micRequest) micBtn.disabled = false;
+    }
   });
-  demoIO.observe($("#demo"));
+  function suspend() {
+    stopMic();
+    preventAutoplay();
+    cancel();
+  }
+  addEventListener("pagehide", suspend);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) suspend(); });
+  motion.addEventListener("change", () => { if (motion.matches) suspend(); });
 
-  /* ---------------- Streaming timeline ---------------- */
-  (() => {
-    const track = $("#tlWave").parentElement;
-    const wave = $("#tlWave"), head = $("#tlHead"), chunksEl = $("#tlChunks");
-    const status = $("#tlStatus"), time = $("#tlTime");
-    const D = 9000; // ms of animation for the whole "recording"
-    const cuts = [0, 0.27, 0.55, 0.8, 1];
-    const labels = ["Привет всем!", "Итоги:", "релиз готов", "тесты ок."];
-    let started = 0, done = [], running = false;
+  // One silent preview on entry. The visitor can finish, cancel or replay it.
+  const autoObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !document.hidden && !motion.matches) {
+      clearTimeout(autoTimer);
+      autoTimer = setTimeout(startDemo, 1700);
+    } else {
+      clearTimeout(autoTimer);
+    }
+  }, {threshold: .45});
+  autoObserver.observe(instrument);
+  setPhase("ready");
 
-    function reset() {
-      const width = track.clientWidth;
-      wave.innerHTML = ""; chunksEl.innerHTML = ""; done = [];
-      const n = Math.floor((width - 8) / 4);
-      for (let i = 0; i < n; i++) {
-        const x = i / n;
-        const nearCut = cuts.some((c) => Math.abs(c - x) < 0.018);
-        const h = nearCut ? 2 : 4 + Math.abs(Math.sin(i * 0.9) * Math.sin(i * 0.23)) * 24 + Math.random() * 4;
-        const bar = document.createElement("i"); bar.style.height = h + "px";
-        wave.appendChild(bar);
-      }
-      status.textContent = "Говорите…"; status.classList.remove("done");
-      started = performance.now();
-    }
-    function chunk(i, cls, text) {
-      const el = document.createElement("div");
-      el.className = "tl-chunk " + cls;
-      el.style.left = cuts[i] * 100 + "%";
-      el.style.width = `calc(${(cuts[i + 1] - cuts[i]) * 100}% - 4px)`;
-      el.textContent = text;
-      chunksEl.appendChild(el);
-      return el;
-    }
-    function tick(now) {
-      if (!running) return;
-      const p = Math.min(1, (now - started) / D);
-      const width = track.clientWidth;
-      wave.style.width = p * width + "px";
-      head.style.left = p * (width - 2) + "px";
-      head.style.opacity = p < 1 ? 1 : 0;
-      const secs = Math.round(p * 300);
-      time.textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
-      // Each phrase is transcribed as soon as its pause arrives, while recording continues.
-      for (let i = 0; i < 3; i++) {
-        if (p >= cuts[i + 1] && !done[i]) {
-          done[i] = true;
-          const el = chunk(i, "busy", "");
-          setTimeout(() => { el.className = "tl-chunk"; el.textContent = labels[i]; }, 900);
-        }
-      }
-      if (p >= 1 && !done[3]) {
-        done[3] = true;
-        status.textContent = "Стоп. Дописываю последние слова…";
-        const el = chunk(3, "busy", "");
-        setTimeout(() => {
-          el.className = "tl-chunk tail"; el.textContent = labels[3];
-          status.textContent = "Текст готов через 0,6 с после стопа"; status.classList.add("done");
-        }, 600);
-        setTimeout(() => { reset(); }, 4200);
-      }
-      requestAnimationFrame(tick);
-    }
-    const tio = new IntersectionObserver((entries) => {
-      const visible = entries.some((e) => e.isIntersecting);
-      if (visible && !running) { running = true; reset(); requestAnimationFrame(tick); }
-      if (!visible) running = false;
+  /* Cleanup playground. The input and samples use the exact same Fillers port. */
+  const input = $("#fillerIn");
+  const samples = $$("[data-sample]");
+  function updateResult() {
+    $("#fillerOut").textContent = Fillers(input.value) || "—";
+    samples.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.sample === input.value)));
+  }
+  input.addEventListener("input", updateResult);
+  samples.forEach(button => button.addEventListener("click", () => {
+    input.value = button.dataset.sample;
+    updateResult();
+  }));
+  updateResult();
+
+  const holdKey = $("#holdKey");
+  const holdOut = $("#holdOut");
+  const phrases = ["Встреча переносится на четверг.", "Купить молоко и кофе.", "После code review отправлю правки."];
+  let heldSince = null;
+  let phrase = 0;
+  function hold() {
+    if (heldSince !== null) return;
+    heldSince = performance.now();
+    holdKey.classList.add("down");
+    holdOut.textContent = "Говорите…";
+    chime("start");
+  }
+  function release(event) {
+    if (heldSince === null) return;
+    const insert = performance.now() - heldSince >= 350 && !["pointercancel", "blur"].includes(event.type);
+    heldSince = null;
+    holdKey.classList.remove("down");
+    holdOut.textContent = insert ? "«" + phrases[phrase++ % phrases.length] + "»" : "Удерживайте, пока говорите";
+    chime("stop");
+  }
+  holdKey.addEventListener("pointerdown", event => {
+    if (event.button !== 0) return;
+    holdKey.setPointerCapture(event.pointerId);
+    hold();
+  });
+  holdKey.addEventListener("pointerup", release);
+  holdKey.addEventListener("pointercancel", release);
+  holdKey.addEventListener("blur", release);
+  for (const type of ["keydown", "keyup"]) {
+    holdKey.addEventListener(type, event => {
+      if (event.altKey || !["Space", "Enter"].includes(event.code)) return;
+      event.preventDefault();
+      if (type === "keyup") release(event);
+      else if (!event.repeat) hold();
     });
-    tio.observe($("#timeline"));
-  })();
-
-  /* ---------------- Mixed languages ---------------- */
-  (() => {
-    const el = $("#mixed");
-    const lines = [
-      [["Короче, вылезла ошибка "], ["Cannot find type User in scope", 1], [", посмотри."]],
-      [["Запушил фикс в "], ["main", 1], [", завтра сделаем "], ["code review", 1], ["."]],
-      [["Build failed with exit code 1", 1], [" — опять что-то с зависимостями."]],
-    ];
-    let i = 0;
-    async function show() {
-      const line = lines[i++ % lines.length];
-      // An English run is one highlighted span, so the highlight doesn't break between words.
-      el.innerHTML = "<span>" + line.map(([t, en]) => {
-        const words = t.split(/(\s+)/).filter(Boolean).map((w) => `<span class="w">${w}</span>`).join("");
-        return en ? `<span class="en">${words}</span>` : words;
-      }).join("") + "</span>";
-      const words = $$(".w", el);
-      for (const w of words) { w.classList.add("on"); await sleepRaw(reduceMotion ? 0 : 90); }
-      await sleepRaw(2800);
-      words.forEach((w) => w.classList.remove("on"));
-      await sleepRaw(400);
-      show();
-    }
-    show();
-  })();
-
-  /* ---------------- Fillers playground ---------------- */
-  (() => {
-    const input = $("#fillerIn"), out = $("#fillerOut");
-    const update = () => {
-      out.textContent = Fillers(input.value) || "—";
-      out.classList.remove("flash"); void out.offsetWidth; out.classList.add("flash");
-    };
-    input.addEventListener("input", update);
-    $$("[data-sample]").forEach((b) => b.addEventListener("click", () => { input.value = b.dataset.sample; update(); }));
-    update();
-  })();
-
-  /* ---------------- Hold to talk ---------------- */
-  (() => {
-    const key = $("#holdKey"), mini = $("#miniPill"), out = $("#holdOut");
-    const phrases = ["Встреча переносится на четверг.", "Купить молоко и кофе.", "Отправь мне, пожалуйста, отчёт.", "Looks good to me, мержим."];
-    let downAt = 0, timer = null, n = 0;
-    function down(e) {
-      e.preventDefault();
-      if (downAt) return;
-      downAt = performance.now();
-      key.classList.add("down"); mini.classList.add("on");
-      out.textContent = "Говорите…"; out.classList.remove("done");
-      chime("start", true);
-      timer = setInterval(() => { miniBars.target = Math.random() < 0.25 ? 0.05 : 0.5 + Math.random() * 0.5; }, 140);
-    }
-    function up() {
-      if (!downAt) return;
-      const held = performance.now() - downAt;
-      downAt = 0;
-      clearInterval(timer); miniBars.target = 0;
-      key.classList.remove("down"); mini.classList.remove("on");
-      chime("stop", true);
-      if (held < 350) { out.textContent = "Держите клавишу, пока говорите"; return; }
-      out.textContent = "«" + phrases[n++ % phrases.length] + "»"; out.classList.add("done");
-    }
-    key.addEventListener("pointerdown", down);
-    addEventListener("pointerup", up);
-    key.addEventListener("pointercancel", up);
-    key.addEventListener("keydown", (e) => { if ((e.code === "Space" || e.code === "Enter") && !e.repeat) down(e); });
-    key.addEventListener("keyup", (e) => { if (e.code === "Space" || e.code === "Enter") up(); });
-  })();
-
-  /* ---------------- Recent at caret ---------------- */
-  (() => {
-    const field = $("#recentText"), popup = $("#popup");
-    let count = 0;
-    $$(".p-row", popup).forEach((row) => row.addEventListener("click", () => {
-      if (count++ % 3 === 0) field.textContent = "Привет! ";
-      field.textContent += row.dataset.text + " ";
-      popup.classList.add("closed");
-      setTimeout(() => popup.classList.remove("closed"), 1500);
-    }));
-  })();
+  }
+  $$(".recent-list button").forEach(button => button.addEventListener("click", () => {
+    $("#recentText").textContent = button.textContent;
+  }));
 })();

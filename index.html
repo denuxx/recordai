@@ -1,291 +1,248 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Record AI — голосовой ввод для Mac</title>
-<meta name="description" content="Нажмите горячую клавишу, скажите — и текст появится там, где стоит курсор. С пунктуацией, сленгом и английским посреди русской речи. Работает без интернета. Бесплатно.">
-<meta property="og:title" content="Record AI — голосовой ввод для Mac">
-<meta property="og:description" content="Говорите. Текст появится сам. Локально, без интернета, бесплатно.">
-<meta property="og:image" content="assets/icon.png">
-<meta name="theme-color" content="#fbfbfd">
-<link rel="icon" type="image/png" href="assets/favicon.png">
-<link rel="apple-touch-icon" href="assets/icon.png">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-dns-prefetch-control" content="off">
+  <meta http-equiv="Content-Security-Policy" content="connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <meta name="theme-color" content="#faf9f6">
+  <meta name="description" content="Бесплатная диктовка для Mac. Нажмите ⌥ Space и говорите по-русски или по-английски. Record AI распознаёт речь на устройстве и вставляет текст у курсора.">
+  <meta property="og:title" content="Record AI — голосовой ввод для Mac">
+  <meta property="og:description" content="Из речи в текст в любом приложении. Бесплатно, без аккаунта, на вашем Mac.">
+  <meta property="og:image" content="assets/icon.png">
+  <title>Record AI — голосовой ввод для Mac</title>
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
 </head>
-<body>
+<body id="top">
+  <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
+      <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 10v4m4-8v12m5-16v20m5-17v14m4-9v4"/></symbol>
+      <symbol id="i-chip" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6" rx=".5"/><path d="M9 2v3m6-3v3M9 19v3m6-3v3M2 9h3m-3 6h3m14-6h3m-3 6h3"/></symbol>
+      <symbol id="i-note" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M4 8h16M8 12h8m-8 4h5"/></symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21m-4 0h8"/></symbol>
+      <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 8a6 6 0 0 1 0 8m2.5-10.5a9 9 0 0 1 0 13"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-return" viewBox="0 0 24 24"><path d="M20 5v7a3 3 0 0 1-3 3H4m5-5-5 5 5 5"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
+      <symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 10a8.5 8.5 0 1 1 1 7M3 4v6h6M12 7v5l3.5 2"/></symbol>
+      <symbol id="i-key" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M6 9h1m3 0h1m3 0h1m3 0h.1M6 12h1m3 0h1m3 0h1m3 0h.1M8 15h8"/></symbol>
+    </defs>
+  </svg>
+  <a class="skip" href="#main">Перейти к содержанию</a>
+  <header class="masthead">
+    <nav class="wrap nav" aria-label="Основное меню">
+      <a class="brand" href="#top"><img src="assets/mark.svg" alt="" width="32" height="32">Record AI</a>
+      <div class="nav-links">
+        <a href="#features">Возможности</a><a href="#technology">Технология</a><a href="#install">Установка</a>
+      </div>
+      <a class="button button-outline nav-download js-download" href="https://github.com/denuxx/recordai/releases/latest/download/Record-AI.dmg"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Скачать</a>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="wrap launch" aria-labelledby="hero-title">
+      <div class="hero">
+        <div>
+          <p class="kicker"><span class="rule"></span>Голосовой ввод для Mac</p>
+          <h1 id="hero-title">Ваш голос —<br><em>уже текст.</em></h1>
+        </div>
+        <div class="hero-intro">
+          <p>Нажмите <kbd>⌥ Space</kbd> и говорите. Record AI вставит текст туда, где стоит курсор. Всё распознавание — на вашем Mac.</p>
+          <div class="hero-actions">
+            <a class="button button-dark js-download" href="https://github.com/denuxx/recordai/releases/latest/download/Record-AI.dmg"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Скачать для Mac</a>
+            <span>Бесплатно</span>
+          </div>
+          <p class="requirements">macOS 14+ <span>·</span> Apple Silicon <span>·</span> ≈3 МБ</p>
+        </div>
+      </div>
 
-<nav class="nav" id="nav">
-  <div class="nav-inner">
-    <a class="brand" href="#top"><img src="assets/favicon.png" alt="" width="22" height="22"><span>Record AI</span></a>
-    <div class="nav-links">
-      <a href="#features">Возможности</a>
-      <a href="#privacy">Приватность</a>
-      <a href="#install">Установка</a>
-      <a href="#faq">Вопросы</a>
+      <section class="instrument" id="demo" aria-labelledby="demo-heading">
+        <div class="board">
+          <div class="board-head">
+            <h2 class="instrument-title" id="demo-heading"><span class="signal-light"></span>Демонстрация</h2>
+            <span class="device-label"><svg class="icon" aria-hidden="true"><use href="#i-chip"/></svg>На устройстве</span>
+          </div>
+          <div class="signal-path">
+            <div class="input-signal">
+              <div class="plot-head"><span>Входной сигнал</span><span>RU / EN</span></div>
+              <div class="plot" aria-hidden="true">
+                <img src="assets/signal.svg" alt="" width="520" height="110">
+                <span class="scan"></span>
+              </div>
+              <div class="axis" aria-hidden="true"><span>0:00</span><span>0:01</span><span>0:02</span><span>0:03</span></div>
+              <p class="caption" id="caption" aria-hidden="true">«<s>Ну, короче,</s> покажу прототип завтра на встрече»</p>
+            </div>
+            <div class="transfer" aria-hidden="true"><svg class="icon"><use href="#i-arrow"/></svg></div>
+            <div class="note-wrap">
+              <div class="note-window">
+                <div class="titlebar"><div class="traffic" aria-hidden="true"><i></i><i></i><i></i></div><span><svg class="icon" aria-hidden="true"><use href="#i-note"/></svg>Заметки</span></div>
+                <div class="note">
+                  <span class="note-date">Сегодня, 10:24</span>
+                  <h3>План на сегодня</h3>
+                  <div class="note-body">Первая версия уже готова. <span id="noteText">Покажу прототип завтра на встрече.</span><span class="caret" aria-hidden="true"></span></div>
+                </div>
+              </div>
+              <div class="pill" id="pill" data-state="ready">
+                <button type="button" class="pill-btn cancel" id="cancelDemo" aria-label="Отменить диктовку" disabled>×</button>
+                <span class="bars" id="bars" aria-hidden="true"></span>
+                <button type="button" class="pill-btn confirm" id="confirmDemo" aria-label="Вставить текст" disabled>✓</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-controls">
+          <button class="demo-trigger" id="keyHint" type="button"><span class="play-icon"><svg class="icon" aria-hidden="true"><use id="playIcon" href="#i-play"/></svg></span><span id="playLabel">Запустить демо</span></button>
+          <kbd class="shortcut">⌥ Space</kbd>
+          <div class="demo-options">
+            <button class="tool" id="micBtn" type="button" aria-pressed="false" aria-label="Волна от микрофона" title="Волна от вашего микрофона"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span>Микрофон</span></button>
+            <button class="tool" id="soundBtn" type="button" aria-pressed="false" title="Звук начала и конца диктовки"><svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg><span>Звук</span></button>
+          </div>
+        </div>
+        <p class="demo-status" id="demoText" role="status"></p>
+      </section>
+    </section>
+
+    <section class="wrap section" id="features" aria-labelledby="features-heading">
+      <div class="section-head">
+        <div><p class="kicker"><span class="rule"></span>Возможности</p><h2 id="features-heading">Диктовка в деталях.</h2></div>
+        <p>Говорите в своём темпе. Record AI расставит знаки препинания и уберёт слова-паразиты.</p>
+      </div>
+      <article class="editor">
+        <div class="editor-intro">
+          <h3>Без лишних слов.</h3>
+          <p>«Ну» и «эээ» исчезнут, а «сделай текст короче» останется. Отредактируйте фразу или выберите пример.</p>
+          <div class="samples" aria-label="Примеры для проверки">
+            <button type="button" data-sample="Ну, короче, покажу прототип завтра на встрече." aria-pressed="true">Слова-паразиты</button>
+            <button type="button" data-sample="Сделай текст короче, пожалуйста." aria-pressed="false">«Сделай короче»</button>
+            <button type="button" data-sample="Ну, короче, после code review отправлю правки." aria-pressed="false">RU + EN</button>
+            <button type="button" data-sample="Я я думаю, короче, что тип данных, типа, неправильный." aria-pressed="false">Повторы</button>
+            <button type="button" data-sample="So, um, I mean, it works, you know." aria-pressed="false" lang="en">English</button>
+          </div>
+        </div>
+        <div class="editor-fields">
+          <label class="field-label" for="fillerIn"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Вы говорите</label>
+          <textarea id="fillerIn" rows="2" spellcheck="false">Ну, короче, покажу прототип завтра на встрече.</textarea>
+          <div class="output"><span class="field-label" id="result-label"><svg class="icon" aria-hidden="true"><use href="#i-return"/></svg>У курсора</span>
+            <output id="fillerOut" for="fillerIn" aria-labelledby="result-label">Покажу прототип завтра на встрече.</output>
+          </div>
+        </div>
+      </article>
+      <article class="editor polish" id="polish" aria-labelledby="polish-heading">
+        <div class="editor-intro">
+          <p class="optional-tag">Необязательно</p>
+          <h3 id="polish-heading">Отшлифовать с GPT.</h3>
+          <p>Если хочется ещё точнее, включите в настройках исправление через GPT. Он поправит неверно услышанные слова, пунктуацию и регистр, не переписывая ваши формулировки.</p>
+          <ul class="polish-ways">
+            <li><b>Подписка ChatGPT.</b> Через официальный Codex CLI, в который вы вошли своим аккаунтом ChatGPT. Ключ не нужен.</li>
+            <li><b>Ключ API OpenAI.</b> Хранится в Связке ключей macOS.</li>
+          </ul>
+          <p class="polish-note">Выключено по умолчанию. Когда включено, в OpenAI уходит только распознанный текст, голос — никогда. Нет сети — вставится обычный локальный текст.</p>
+        </div>
+        <div class="editor-fields">
+          <span class="field-label"><svg class="icon" aria-hidden="true"><use href="#i-chip"/></svg>На устройстве</span>
+          <p class="polish-before">Завтра <mark class="miss">созван</mark> в 10, надо обсудить релиз и <mark class="miss">деплей</mark>.</p>
+          <div class="output"><span class="field-label"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>После GPT</span>
+            <p class="polish-after">Завтра <mark class="fix">созвон</mark> в 10, надо обсудить релиз и <mark class="fix">деплой</mark>.</p>
+          </div>
+          <p class="polish-caption">Пример ошибки распознавания и её исправления.</p>
+        </div>
+      </article>
+      <div class="feature-pair">
+        <article>
+          <svg class="feature-icon icon" aria-hidden="true"><use href="#i-key"/></svg>
+          <h3>Держите и говорите.</h3>
+          <p>Зажмите сочетание, чтобы начать, и отпустите, чтобы вставить текст. Для длинной диктовки нажмите один раз в начале и ещё раз в конце.</p>
+          <div class="hold-demo">
+            <button class="keycap" id="holdKey" type="button" aria-label="Попробовать режим удержания">⌥ Space</button>
+            <span id="holdOut" role="status">Попробуйте удержать</span>
+          </div>
+          <div class="feature-foot"><kbd>Esc</kbd> отменить <span>·</span> <kbd>Enter</kbd> вставить</div>
+        </article>
+        <article>
+          <svg class="feature-icon icon" aria-hidden="true"><use href="#i-history"/></svg>
+          <h3>Три последние фразы.</h3>
+          <p>Нажмите <kbd>⌥⇧ Space</kbd>, чтобы открыть историю у курсора. Выберите фразу для вставки.</p>
+          <div class="recent-list" aria-label="Примеры из истории">
+            <button type="button">Давай созвонимся завтра в десять.</button>
+            <button type="button">Пришли, пожалуйста, ссылку на макет.</button>
+            <button type="button">После code review отправлю правки.</button>
+          </div>
+          <p class="recent-result" id="recentText" role="status">Здесь появится выбранная фраза<span class="caret" aria-hidden="true"></span></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="tech-section" id="technology" aria-labelledby="tech-heading">
+      <div class="wrap">
+        <div class="section-head">
+          <div><p class="kicker"><span class="rule"></span>Технология</p><h2 id="tech-heading">Внутри вашего Mac.</h2></div>
+          <p>WhisperKit запускает модель распознавания на Apple Neural Engine. Каждая фраза обрабатывается уже во время диктовки.</p>
+        </div>
+        <div class="tech-grid">
+          <figure class="processor">
+            <img src="assets/processor.svg" alt="Нейропроцессор получает голосовой сигнал и передаёт распознанный текст к курсору." width="480" height="230" loading="lazy">
+            <figcaption><span>Микрофон</span><span>Neural Engine</span><span>Курсор</span></figcaption>
+          </figure>
+          <dl class="specs">
+            <div><dt>Модель</dt><dd lang="en">Whisper large-v3-turbo</dd></div>
+            <div><dt>Языки</dt><dd>Русский и English в одной фразе</dd></div>
+            <div><dt>Текст после остановки</dt><dd>≈1 секунда</dd></div>
+            <div><dt>Система</dt><dd>Apple Silicon · macOS 14+</dd></div>
+            <div><dt>Приложение / модель</dt><dd>≈3 МБ / ≈1,6 ГБ</dd></div>
+          </dl>
+        </div>
+        <div class="privacy" id="privacy">
+          <svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>
+          <div><h3>Голос остаётся у вас.</h3><p>Аудио обрабатывается в памяти Mac. Приложение его не сохраняет и никуда не отправляет. Тексты диктовок хранятся на устройстве семь дней и удаляются автоматически. Интернет нужен один раз — для загрузки модели. Исправление через GPT по желанию: только текст и только если вы его включили.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap section split-section" id="install" aria-labelledby="install-heading">
+      <div class="section-aside" id="download">
+        <p class="kicker"><span class="rule"></span>Установка</p>
+        <h2 id="install-heading">На ваш Mac.</h2>
+        <p>Бесплатно. Без аккаунта и подписки.</p>
+        <a class="button button-dark js-download" href="https://github.com/denuxx/recordai/releases/latest/download/Record-AI.dmg"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Скачать для Mac</a>
+        <div class="requirements"><span id="version">Версия 1.1.0</span> · ≈3 МБ</div>
+      </div>
+      <div>
+        <ol class="steps">
+          <li><h3>Скачайте приложение</h3><p>Откройте файл <code>Record-AI.dmg</code>.</p></li>
+          <li><h3>Перенесите в «Программы»</h3><p>Перетащите Record AI на папку Applications в окне установщика.</p></li>
+          <li><h3>Подтвердите первый запуск</h3><p>В «Программах» нажмите на Record AI правой кнопкой и выберите «Открыть». В предупреждении нажмите «Готово». Затем откройте «Системные настройки» → «Конфиденциальность и безопасность» и нажмите «Всё равно открыть».</p>
+            <details class="gatekeeper"><summary>Почему macOS просит подтверждение?</summary><p>У приложения нет сертификата разработчика, поэтому Gatekeeper просит подтвердить запуск. Можно также снять атрибут карантина через Терминал.</p><pre><code>xattr -dr com.apple.quarantine "/Applications/Record AI.app"</code></pre></details>
+          </li>
+          <li><h3>Разрешите диктовку</h3><p>Дайте доступ к микрофону для записи речи и включите «Универсальный доступ» для вставки текста. При первом запуске загрузится модель объёмом около 1,6 ГБ. Её подготовка может занять до 15 минут.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="wrap section split-section faq" id="faq" aria-labelledby="faq-heading">
+      <div><p class="kicker"><span class="rule"></span>Справка</p><h2 id="faq-heading">Вопросы.</h2></div>
+      <div class="questions">
+        <details><summary>Это правда бесплатно?</summary><p>Да. Исходный код закрыт, а само приложение бесплатно. Без подписки, рекламы и ограничений по времени.</p></details>
+        <details><summary>Насколько точно распознаёт?</summary><p>Whisper large-v3-turbo понимает разговорную речь и сленг, расставляет знаки препинания и сохраняет английские термины внутри русской фразы.</p></details>
+        <details><summary>Что даёт исправление через GPT?</summary><p>Это необязательная функция, по умолчанию она выключена. GPT исправляет слова, которые модель услышала неверно, а также пунктуацию и регистр. Включается в настройках Record AI: через подписку ChatGPT (нужен Codex CLI, выполните в нём вход через ChatGPT командой <code>codex login</code>) или через ключ API OpenAI. В OpenAI отправляется только распознанный текст, голос остаётся на Mac. Если сеть недоступна или ответ задерживается, вставится обычный локальный текст.</p></details>
+        <details><summary>В каких приложениях работает?</summary><p>Везде, где можно поставить текстовый курсор, в том числе в заметках, почте, браузере, редакторе кода или терминале. Текст вставится туда, где стоял курсор в начале диктовки.</p></details>
+        <details><summary>Подойдёт ли мой Mac?</summary><p>Нужен Mac на Apple Silicon (M1 или новее) с macOS 14 Sonoma или новее. Mac с процессором Intel не поддерживается.</p></details>
+        <details><summary>Сколько места занимает?</summary><p>Файл приложения весит около 3 МБ. При первом запуске Record AI загрузит модель распознавания — ещё около 1,6 ГБ.</p></details>
+        <details><summary>Как поменять горячую клавишу?</summary><p>Откройте Record AI через Spotlight (<kbd>⌘ Space</kbd>). В настройках можно назначить сочетание или одну клавишу, например <kbd>Ё</kbd>.</p></details>
+        <details><summary>Как удалить приложение?</summary><p>Откройте Record AI через Spotlight, нажмите «Выйти из Record AI» и перетащите приложение в корзину. Папку с моделью и историей тоже можно удалить: <code>~/Library/Application Support/RecordAI</code>.</p></details>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap footer-inner">
+      <a class="brand" href="#top"><img src="assets/mark.svg" alt="" width="27" height="27">Record AI</a>
+      <p><a href="https://github.com/openai/whisper" rel="noopener">Whisper от OpenAI</a><span>·</span><a href="https://github.com/argmaxinc/WhisperKit" rel="noopener">WhisperKit от Argmax</a></p>
     </div>
-    <a class="btn btn-small js-download" href="#download">Скачать</a>
-  </div>
-</nav>
-
-<main id="top">
-
-<!-- ============ HERO ============ -->
-<header class="hero">
-  <div class="hero-glow" aria-hidden="true"></div>
-  <p class="eyebrow reveal">Голосовой ввод для Mac · бесплатно</p>
-  <h1 class="reveal">Говорите.<br><span class="grad">Текст появится сам.</span></h1>
-  <p class="lead reveal">Нажмите горячую клавишу, скажите — и текст окажется там, где стоит курсор. С&nbsp;пунктуацией, сленгом и английским посреди русской речи. Без интернета.</p>
-  <div class="cta reveal">
-    <a class="btn btn-primary js-download" href="#download">
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.9-1.1-2.9-4.2zM13.9 5.2c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>
-      Скачать для Mac
-    </a>
-    <a class="btn btn-ghost" href="#demo">Как это работает</a>
-  </div>
-  <p class="fineprint reveal">macOS 14 и новее · Apple Silicon · 3 МБ</p>
-
-  <!-- Live demo -->
-  <section class="demo reveal" id="demo" aria-label="Демонстрация">
-    <div class="stage" id="stage">
-      <div class="window" id="window">
-        <div class="titlebar">
-          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-          <span class="title">Заметки</span>
-        </div>
-        <div class="note">
-          <div class="note-date">Сегодня, 10:24</div>
-          <div class="note-title">План на неделю</div>
-          <div class="note-body" id="noteBody"><span id="noteText"></span><span class="caret" id="caret"></span></div>
-        </div>
-        <div class="caption fade" id="caption" aria-live="polite"></div>
-        <div class="pill" id="pill" data-state="hidden">
-          <span class="pill-btn x" aria-hidden="true">✕</span>
-          <span class="bars" id="bars"></span>
-          <span class="pill-btn ok" aria-hidden="true">✓</span>
-          <span class="dots"><i></i><i></i><i></i></span>
-        </div>
-      </div>
-    </div>
-    <div class="demo-controls">
-      <button class="key-hint" id="keyHint" type="button" aria-label="Запустить демонстрацию">
-        <kbd>⌥</kbd><kbd class="wide">Space</kbd>
-      </button>
-      <span class="demo-text" id="demoText">Нажмите <b>⌥ Space</b> прямо сейчас — или просто смотрите</span>
-      <div class="demo-toggles">
-        <button class="chip" id="micBtn" type="button" aria-pressed="false">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1a7 7 0 0 0 6-6.9h-2z"/></svg>
-          <span>Волна от вашего голоса</span>
-        </button>
-        <button class="chip" id="soundBtn" type="button" aria-pressed="false">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
-          <span>Звук</span>
-        </button>
-      </div>
-    </div>
-  </section>
-</header>
-
-<!-- ============ STATEMENT ============ -->
-<section class="statement">
-  <p class="reveal big-quote">Печатать — медленно. <span class="muted">Говорить — в несколько раз быстрее.</span> Record&nbsp;AI превращает речь в&nbsp;аккуратный текст в&nbsp;любом приложении: в&nbsp;заметках, почте, Telegram, Cursor или терминале.</p>
-</section>
-
-<!-- ============ FEATURES (BENTO) ============ -->
-<section class="features" id="features">
-  <h2 class="section-title reveal">Маленькое приложение.<br><span class="muted">Много продуманных мелочей.</span></h2>
-
-  <div class="bento">
-
-    <!-- Streaming -->
-    <article class="tile tile-wide reveal">
-      <div class="tile-copy">
-        <h3>Распознаёт, пока вы говорите</h3>
-        <p>Запись режется на фразы по паузам, и каждая распознаётся сразу. Когда вы нажимаете стоп, остаётся дописать только последние слова — поэтому текст готов примерно <b>через секунду</b>, даже после десяти минут диктовки.</p>
-      </div>
-      <div class="timeline" id="timeline" aria-hidden="true">
-        <div class="tl-row">
-          <span class="tl-label">Запись</span>
-          <div class="tl-track"><div class="tl-wave" id="tlWave"></div><div class="tl-head" id="tlHead"></div></div>
-        </div>
-        <div class="tl-row">
-          <span class="tl-label">Текст</span>
-          <div class="tl-track" id="tlChunks"></div>
-        </div>
-        <div class="tl-foot"><span id="tlStatus">Говорите…</span><span class="tl-time" id="tlTime">0:00</span></div>
-      </div>
-    </article>
-
-    <!-- Offline -->
-    <article class="tile reveal">
-      <div class="offline">
-        <div class="offline-num"><span id="bytes">0</span><small>байт</small></div>
-        <div class="offline-sub">отправлено в интернет</div>
-        <div class="offline-rings" aria-hidden="true"><i></i><i></i><i></i></div>
-      </div>
-      <h3>Без интернета</h3>
-      <p>Нейросеть Whisper работает на Neural Engine вашего Mac. Голос не уходит ни на какой сервер — можно диктовать хоть в самолёте.</p>
-    </article>
-
-    <!-- Mixed languages -->
-    <article class="tile reveal">
-      <div class="mixed" id="mixed" aria-live="polite"></div>
-      <h3>Русский + English</h3>
-      <p>Язык определяется для каждой фразы. Прочитайте вслух ошибку из консоли посреди русского объяснения — она останется на английском.</p>
-    </article>
-
-    <!-- Fillers -->
-    <article class="tile tile-wide reveal">
-      <div class="tile-copy">
-        <h3>Без «ну», «короче» и «эээ»</h3>
-        <p>Слова-паразиты убираются, только когда они точно паразиты. «Сделай текст короче» останется как есть. Попробуйте сами — это те же правила, что в приложении.</p>
-      </div>
-      <div class="fillers">
-        <label class="f-label" for="fillerIn">Вы говорите</label>
-        <textarea id="fillerIn" rows="3" spellcheck="false">Ну, короче, я сегодня, эээ, сделал деплой, вот. Это, типа, работает, но, как бы, не всегда.</textarea>
-        <div class="f-arrow" aria-hidden="true">↓</div>
-        <div class="f-label">Вставится</div>
-        <div class="f-out" id="fillerOut" aria-live="polite"></div>
-        <div class="f-samples">
-          <button type="button" class="chip small" data-sample="Слушай, сделай текст короче, пожалуйста.">«сделай короче»</button>
-          <button type="button" class="chip small" data-sample="So, um, I mean, it works, you know.">English</button>
-          <button type="button" class="chip small" data-sample="Я я думаю, короче, что тип данных, типа, неправильный.">повторы</button>
-        </div>
-      </div>
-    </article>
-
-    <!-- Hold to talk -->
-    <article class="tile reveal">
-      <div class="hold">
-        <button class="keycap" id="holdKey" type="button" aria-label="Зажмите, чтобы говорить">
-          <span>⌥ Space</span>
-        </button>
-        <div class="mini-pill" id="miniPill"><span class="bars" id="miniBars"></span></div>
-        <div class="hold-out" id="holdOut">Зажмите клавишу</div>
-      </div>
-      <h3>Держи и говори</h3>
-      <p>Зажали клавишу — идёт запись, отпустили — текст вставлен. А короткое нажатие включает обычный режим: нажал, говоришь, нажал ещё раз.</p>
-    </article>
-
-    <!-- Recent at caret -->
-    <article class="tile reveal">
-      <div class="recent">
-        <div class="recent-field"><span id="recentText">Привет! </span><span class="caret"></span></div>
-        <div class="popup" id="popup">
-          <button type="button" class="p-row" data-text="Давай созвонимся завтра в десять."><span class="p-num">1</span><span class="p-body"><span class="p-text">Давай созвонимся завтра в десять.</span><span class="p-time">2 мин. назад</span></span></button>
-          <button type="button" class="p-row" data-text="Скинь, пожалуйста, ссылку на макет."><span class="p-num">2</span><span class="p-body"><span class="p-text">Скинь, пожалуйста, ссылку на макет.</span><span class="p-time">24 мин. назад</span></span></button>
-          <button type="button" class="p-row" data-text="Build failed with exit code 1."><span class="p-num">3</span><span class="p-body"><span class="p-text">Build failed with exit code 1.</span><span class="p-time">1 ч назад</span></span></button>
-        </div>
-      </div>
-      <h3>Последние записи у курсора</h3>
-      <p><b>⌥⇧ Space</b> показывает три последние диктовки прямо у курсора. Клик — и нужная вставлена. Нажмите на любую.</p>
-    </article>
-
-    <!-- Small tiles -->
-    <article class="tile tile-small reveal">
-      <div class="keys-row"><kbd>Enter</kbd><span>вставить</span></div>
-      <div class="keys-row"><kbd>Esc</kbd><span>отменить</span></div>
-      <h3>Под рукой</h3>
-      <p>Закончить или отменить диктовку можно, не отрывая рук от клавиатуры.</p>
-    </article>
-
-    <article class="tile tile-small reveal">
-      <div class="spaces" aria-hidden="true"><i></i><i class="on"></i><i></i></div>
-      <h3>Не крадёт фокус</h3>
-      <p>Переключайтесь между приложениями и рабочими столами — текст вставится туда, где был курсор в начале.</p>
-    </article>
-
-    <article class="tile tile-small reveal">
-      <button class="drop" id="dropBtn" type="button" aria-label="Послушать звук">
-        <span class="ripple"></span><span class="ripple"></span>
-        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M12 2.7S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.7 12 2.7z"/></svg>
-      </button>
-      <h3>Звук капли</h3>
-      <p>Тихий сигнал на старте и стопе — слышно, что запись пошла. Нажмите на каплю.</p>
-    </article>
-
-  </div>
-</section>
-
-<!-- ============ PRIVACY ============ -->
-<section class="privacy" id="privacy">
-  <div class="privacy-inner">
-    <div class="lock reveal" aria-hidden="true">
-      <svg viewBox="0 0 64 64" width="64" height="64"><rect x="12" y="28" width="40" height="28" rx="8" fill="none" stroke="currentColor" stroke-width="3"/><path d="M21 28v-7a11 11 0 0 1 22 0v7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="42" r="3.5" fill="currentColor"/></svg>
-    </div>
-    <h2 class="reveal">Ваш голос не&nbsp;покидает&nbsp;Mac.</h2>
-    <div class="privacy-grid">
-      <div class="reveal"><b>Всё локально</b><span>Распознавание идёт на Neural Engine. Интернет нужен один раз — скачать модель.</span></div>
-      <div class="reveal"><b>Аудио не хранится</b><span>Звук живёт в памяти только во время записи и сразу удаляется.</span></div>
-      <div class="reveal"><b>История — у вас</b><span>Тексты за последние 7 дней лежат в файле на вашем Mac и удаляются сами.</span></div>
-      <div class="reveal"><b>Без аккаунта</b><span>Ни регистрации, ни подписки, ни аналитики.</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ INSTALL ============ -->
-<section class="install" id="install">
-  <h2 class="section-title reveal">Установка за минуту.</h2>
-  <ol class="steps">
-    <li class="step reveal">
-      <span class="step-num">1</span>
-      <h3>Скачайте</h3>
-      <p>Файл <code>Record-AI.dmg</code> весит 3 МБ.</p>
-    </li>
-    <li class="step reveal">
-      <span class="step-num">2</span>
-      <h3>Перетащите в Программы</h3>
-      <p>Откройте DMG и перетащите Record AI на папку Applications.</p>
-    </li>
-    <li class="step reveal">
-      <span class="step-num">3</span>
-      <h3>Разрешите запуск</h3>
-      <p>При первом открытии нажмите «Готово», затем <b>Системные настройки → Конфиденциальность и безопасность → Всё равно открыть</b>.</p>
-    </li>
-    <li class="step reveal">
-      <span class="step-num">4</span>
-      <h3>Дайте доступ</h3>
-      <p>Микрофон — чтобы слышать. Универсальный доступ — чтобы вставлять текст. Первая подготовка модели займёт до 15 минут.</p>
-    </li>
-  </ol>
-  <details class="why reveal">
-    <summary>Почему macOS предупреждает при первом запуске?</summary>
-    <p>Record AI — бесплатный проект, и он не подписан платным сертификатом Apple за $99 в год. Поэтому macOS не может проверить разработчика и просит подтвердить запуск один раз. Если удобнее Терминал, то же самое делает команда:</p>
-    <pre><code>xattr -dr com.apple.quarantine "/Applications/Record AI.app"</code></pre>
-  </details>
-</section>
-
-<!-- ============ DOWNLOAD ============ -->
-<section class="download" id="download">
-  <div class="dl-glow" aria-hidden="true"></div>
-  <img class="dl-icon reveal" src="assets/icon.png" alt="Иконка Record AI" width="160" height="160">
-  <h2 class="reveal">Record AI</h2>
-  <p class="lead reveal">Бесплатно. Без подписки. Без интернета.</p>
-  <a class="btn btn-primary btn-large js-download reveal" href="#download">Скачать для Mac</a>
-  <p class="fineprint reveal"><span id="version">Версия 1.0.1</span> · macOS 14 Sonoma и новее · Mac на Apple Silicon (M1 и новее)</p>
-</section>
-
-<!-- ============ FAQ ============ -->
-<section class="faq" id="faq">
-  <h2 class="section-title reveal">Вопросы</h2>
-  <details class="reveal"><summary>Это правда бесплатно?</summary><p>Да. Без подписки, рекламы и ограничений по времени.</p></details>
-  <details class="reveal"><summary>Насколько точно распознаёт?</summary><p>Используется Whisper large-v3-turbo — одна из лучших открытых моделей распознавания речи. Она понимает разговорную речь, сленг и расставляет знаки препинания. Английские термины посреди русской фразы тоже остаются на английском.</p></details>
-  <details class="reveal"><summary>В каких приложениях работает?</summary><p>Везде, где можно поставить курсор: заметки, почта, мессенджеры, браузер, редакторы кода, терминал.</p></details>
-  <details class="reveal"><summary>Подойдёт ли мой Mac?</summary><p>Нужен Mac на Apple Silicon (M1, M2, M3, M4 и новее) с macOS 14 Sonoma или новее. На Mac с процессором Intel приложение не запустится.</p></details>
-  <details class="reveal"><summary>Сколько места занимает?</summary><p>Само приложение — 3 МБ, модель распознавания скачивается при первом запуске — около 1,6 ГБ.</p></details>
-  <details class="reveal"><summary>Как поменять горячую клавишу?</summary><p>Откройте Record AI через Spotlight (⌘ Space) — появится окно настроек. Там можно назначить любое сочетание или даже одну клавишу, например <kbd>Ё</kbd>.</p></details>
-  <details class="reveal"><summary>Как удалить?</summary><p>Откройте Record AI через Spotlight, нажмите «Выйти из Record AI» и перетащите приложение в корзину. Модель и история лежат в папке <code>~/Library/Application Support/RecordAI</code> — её тоже можно удалить.</p></details>
-</section>
-
-</main>
-
-<footer class="footer">
-  <div class="footer-inner">
-    <span class="brand"><img src="assets/favicon.png" alt="" width="18" height="18"> Record AI</span>
-    <span class="muted">Распознавание речи — <a href="https://github.com/openai/whisper" rel="noopener">Whisper</a> через <a href="https://github.com/argmaxinc/WhisperKit" rel="noopener">WhisperKit</a>.</span>
-  </div>
-</footer>
-
-<script src="app.js"></script>
+  </footer>
 </body>
 </html>
