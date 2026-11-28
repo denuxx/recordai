@@ -4,7 +4,7 @@
 
   // Where the "Download" buttons point. One place to change it.
   const DOWNLOAD_URL = "https://github.com/denuxx/recordai/releases/latest/download/Record-AI.dmg";
-  const VERSION = "1.1.0";
+  const VERSION = "1.1.1";
 
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
